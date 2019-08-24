@@ -1,0 +1,56 @@
+[
+    {
+        "requests": 4,
+        "totalElapsedTime": 800,
+        "recordedTimes": [
+            {
+                "cprNumber": "0110540396",
+                "timeInMicroservice": 80,
+                "timeInJava": 80,
+                "totalElapsedTime": 160
+            },
+            {
+                "cprNumber": "0612661529",
+                "timeInMicroservice": 75,
+                "timeInJava": 78,
+                "totalElapsedTime": 200
+            },
+            {
+                "cprNumber": "0952484512",
+                "timeInMicroservice": 62,
+                "timeInJava": 63,
+                "totalElapsedTime": 180
+            },
+            {
+                "cprNumber": "0115421583",
+                "timeInMicroservice": 88,
+                "timeInJava": 95,
+                "totalElapsedTime": 260
+            }
+        ]
+    },
+    {
+        "requests": 3,
+        "totalElapsedTime": 755,
+        "recordedTimes": [
+            {
+                "cprNumber": "01105455548",
+                "timeInMicroservice": 36,
+                "timeInJava": 88,
+                "totalElapsedTime": 160
+            },
+            {
+                "cprNumber": "0712554589",
+                "timeInMicroservice": 62,
+                "timeInJava": 69,
+                "totalElapsedTime": 190
+            },
+            {
+                "cprNumber": "0885421563",
+                "timeInMicroservice": 77,
+                "timeInJava": 84,
+                "totalElapsedTime": 250
+            }
+        ]
+    }
+]

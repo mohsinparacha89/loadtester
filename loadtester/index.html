@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css" />
+    <title>Load test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css" integrity="sha256-ECB9bbROLGm8wOoEbHcHRxlHgzGqYpDtNTgDTyDz0wg="
+        crossorigin="anonymous" />
+</head>
+
+<body>
+    <div class="container">
+        <button id="button-full-flow">Full flow</button>
+        <button id="button-ms">Micro service</button>
+        <button id="button-java">Java</button>
+        <h4 id="heading"></h4>
+        <div id="graph"></div>
+        <br>
+        <hr />
+        <div id="pie"></div>
+        <br>
+        <hr>
+        <table class="u-full-width js-sort-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th class="js-sort-number">CPR</th>
+                    <th>CorrelationId</th>
+                    <th>Total Time</th>
+                    <th>Time in Microservice</th>
+                    <th>Time in Java</th>
+                </tr>
+            </thead>
+            <tbody id="api-calls">
+
+            </tbody>
+        </table>
+    </div>
+    <script src='./Highcharts-7.1.3/code/highcharts.js'></script>
+    <script src='./Highcharts-7.1.3/code/modules/series-label.js'></script>
+    <script src='./Highcharts-7.1.3/code/modules/exporting.js'></script>
+    <script src='./Highcharts-7.1.3/code/modules/export-data.js'></script>
+    <script src='./SortTable-master/SortTable-master/sort-table.js'></script>
+    <script src="./app.js"></script>
+
+</body>
+
+</html>
