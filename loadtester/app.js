@@ -1,4 +1,3 @@
-
 let graph = document.getElementById('graph');
 let pie = document.getElementById('pie');
 const heading = document.getElementById('heading');
@@ -6,29 +5,28 @@ let apiData;
 document.getElementById('button-full-flow').addEventListener('click', showFullFlow);
 document.getElementById('button-ms').addEventListener('click', showMs);
 document.getElementById('button-java').addEventListener('click', showJava);
+showTable();
 
-
-function showJava() {
+async function showJava() {
     heading.textContent = 'Java';
-    const categoryList = [43, 46, 55, 89, 56];
-    barGraph(categoryList);
-    pieChart(getRequestCycleData());
+    barGraph(await getAllRequestsDataFullFlow('java'));
+    // showTable();
+    pie.innerHTML = '';
 
 }
-function showFullFlow() {
+async function showFullFlow() {
     heading.textContent = 'Full flow';
-    const categoryList = [43, 46, 55, 89, 56];
-    barGraph(categoryList);
-    pieChart(getRequestCycleData());
-    showTable();
+
+    barGraph(await getAllRequestsDataFullFlow('all'));
+    pieChart(await getRequestCycleDataFullFLow());
 }
 
 
-function showMs() {
+async function showMs() {
     heading.textContent = 'Microservice';
-    const categoryList = [43, 46, 55, 89, 56];
-    barGraph(categoryList);
-    pieChart(getRequestCycleData());
+    barGraph(await getAllRequestsDataFullFlow('microservice'));
+    //  pieChart();
+    pie.innerHTML = '';
 
 }
 
@@ -40,12 +38,12 @@ async function showTable() {
         element.recordedTimes.forEach(e => {
             const row = document.createElement('tr');
             row.innerHTML = `
-            <td>${++i}</td>
-            <td>${e.cprNumber}</td>
-            <td>Correlation</td>
-            <td>${e.totalElapsedTime}</td>
-            <td>${e.timeInMicroservice}</td>
-            <td>${e.timeInJava}</td>
+            <td style="text-align:center">${++i}</td>
+            <td style="text-align:center">${e.cprNumber}</td>
+            <td style="text-align:center">${e.correlationId}</td>
+            <td style="text-align:center">${e.totalElapsedTime}</td>
+            <td style="text-align:center">${e.timeInMicroservice}</td>
+            <td style="text-align:center">${e.timeInJava}</td>
             `
 
             tableRows.appendChild(row);
@@ -55,7 +53,44 @@ async function showTable() {
 
 }
 
-function barGraph(categoryList) {
+async function barGraph(allrequestData) {
+    //console.log(allrequestData)
+    let chartSegments = [];
+    chartSegments.push(allrequestData.floor);
+    let segmentGap = allrequestData.ceiling / 5;
+    let allreqs = [];
+    for (let i = 0; i < 5; i++) {
+        let chartSegment = chartSegments[i] + segmentGap;
+        chartSegments.push(chartSegment)
+    }
+
+    let segmentData = [];
+    let requestTimes = allrequestData.requestTimes;
+    let requestCount = 0;
+
+
+
+    for (let i = 0; i < chartSegments.length; i++) {
+        console.log(chartSegments[i + 1])
+        for (let j = 0; j < requestTimes.length; j++) {
+            if (chartSegments[i + 1] !== undefined) {
+                if (((requestTimes[j] < chartSegments[i + 1]) && (requestTimes[j] >= chartSegments[i]))) {
+                    requestCount += 1;
+                    allreqs.push(requestTimes[j]);
+                }
+            }
+            else {
+                if (requestTimes[j] >= chartSegments[i]) {
+                    requestCount += 1;
+                    allreqs.push(requestTimes[j]);
+                }
+            }
+        }
+        segmentData.push(requestCount);
+        requestCount = 0;
+    }
+    console.log(allreqs);
+
     Highcharts.chart(graph, {
         chart: {
             type: 'column'
@@ -92,20 +127,20 @@ function barGraph(categoryList) {
         series: [{
             name: 'Population',
             data: [
-                ['100-200 ms', categoryList[0]],
-                ['200-300 ms', categoryList[1]],
-                ['300-400 ms', categoryList[2]],
-                ['400-500 ms', categoryList[3]],
-                ['>500 ms', categoryList[4]],
+                [`${chartSegments[0]} -  ${chartSegments[1]}ms`, segmentData[0]],
+                [`${chartSegments[1]} -  ${chartSegments[2]}ms`, segmentData[1]],
+                [`${chartSegments[2]} -  ${chartSegments[3]}ms`, segmentData[2]],
+                [`${chartSegments[3]} -  ${chartSegments[4]}ms`, segmentData[3]],
+                [`> ${chartSegments[4]}ms`, segmentData[4] + segmentData[5]],
             ],
             dataLabels: {
                 enabled: true,
                 rotation: -90,
                 color: '#FFFFFF',
                 align: 'right',
-                y: 40, // 10 pixels down from the top
+                y: 10, // 10 pixels down from the top
                 style: {
-                    fontSize: '17px',
+                    fontSize: '12px',
                     fontFamily: 'Verdana, sans-serif'
                 }
             }
@@ -115,6 +150,7 @@ function barGraph(categoryList) {
 
 
 function pieChart(requestCycleData) {
+
     Highcharts.chart(pie, {
         chart: {
             plotBackgroundColor: null,
@@ -123,7 +159,7 @@ function pieChart(requestCycleData) {
             type: 'pie'
         },
         title: {
-            text: 'Averge time for requests cycles'
+            text: 'Sample requests cycles'
         },
         subtitle: {
             text: `Total request cycles ${requestCycleData.totalCycles} `
@@ -140,19 +176,19 @@ function pieChart(requestCycleData) {
             }
         },
         series: [{
-            name: 'Brands',
+            name: 'Average Time per request',
             colorByPoint: true,
             data: [{
-                name: `${requestCycleData.highest} requests per cycle took ${requestCycleData.highestTime}`,
+                name: `${requestCycleData.highest} requests per cycle took ${requestCycleData.highestTime} ms`,
                 y: 50,
                 sliced: true,
                 selected: true
             }, {
-                name: `${requestCycleData.randomCycle} requests per cycle took ${requestCycleData.ramdomTime}`,
+                name: `${requestCycleData.randomCycle} requests per cycle took ${requestCycleData.ramdomTime} ms`,
                 y: 20
             },
             {
-                name: `${requestCycleData.lowest} requests per cycle took ${requestCycleData.lowestTime}`,
+                name: `${requestCycleData.lowest} requests per cycle took ${requestCycleData.lowestTime} ms`,
                 y: 30
             }]
         }]
@@ -162,22 +198,71 @@ function pieChart(requestCycleData) {
 
 
 
-async function getRequestCycleData() {
+async function getRequestCycleDataFullFLow() {
     let apiResponse = await getJson();
-    let requestsPerCycle = 0;
+    let totalCycles = apiResponse.length;
+    let highestRequestCycle = apiResponse.find((obj) => { return obj.totalElapsedTime === Math.max(...apiResponse.map(c => c.totalElapsedTime)) });
+    let lowestRequestCycle = apiResponse.find((obj) => { return obj.totalElapsedTime === Math.min(...apiResponse.map(c => c.totalElapsedTime)) });
+
+    apiResponse.splice(apiResponse.indexOf(highestRequestCycle), 1);
+    apiResponse.splice(apiResponse.indexOf(lowestRequestCycle), 1);
+
+    let randomRequestCycle = apiResponse[Math.floor(Math.random() * apiResponse.length)];
 
     const requestCycle = {
-        totalCycles: 500,
-        highest: 8,
-        lowest: 3,
-        highestTime: '800 ms',
-        lowestTime: '355 ms',
-        randomCycle: 6,
-        ramdomTime: '345 ms'
-
+        totalCycles: totalCycles,
+        highest: highestRequestCycle.requests,
+        lowest: lowestRequestCycle.requests,
+        highestTime: highestRequestCycle.totalElapsedTime,
+        lowestTime: lowestRequestCycle.totalElapsedTime,
+        randomCycle: randomRequestCycle.requests,
+        ramdomTime: randomRequestCycle.totalElapsedTime
     }
 
     return requestCycle;
+}
+
+async function getAllRequestsDataFullFlow(type) {
+    const allRequestData = await getAllRequestData();
+    let requestTimes = [];
+    console.log('type is ' + type)
+    allRequestData.forEach(e => {
+        if (type === 'microservice') {
+            console.log('adding microservice')
+            requestTimes.push(e.timeInMicroservice);
+        }
+        if (type === 'java') {
+            console.log('adding java')
+            requestTimes.push(e.timeInJava);
+        }
+        if (type === 'all') {
+            console.log('adding all')
+            requestTimes.push(e.totalElapsedTime);
+        }
+    })
+
+    let ceiling = Math.floor(Math.max(...requestTimes) / 100) * 100;
+    let floor = Math.floor(Math.min(...requestTimes) / 100) * 100;
+
+    return requestData = {
+        ceiling,
+        floor,
+        requestTimes,
+    }
+
+}
+
+
+async function getAllRequestData() {
+    let apiResponse = await getJson();
+    let allRequest = [];
+
+    apiResponse.forEach(requestCycle => {
+        requestCycle.recordedTimes.forEach(request => {
+            allRequest.push(request);
+        });
+    });
+    return allRequest;
 }
 
 
