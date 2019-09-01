@@ -9,35 +9,58 @@
     <title>Load test</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css" integrity="sha256-ECB9bbROLGm8wOoEbHcHRxlHgzGqYpDtNTgDTyDz0wg="
         crossorigin="anonymous" />
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+        integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 </head>
 
 <body>
     <div class="container">
-        <button id="button-full-flow">Full flow</button>
-        <button id="button-ms">Micro service</button>
-        <button id="button-java">Java</button>
-        <h4 id="heading"></h4>
-        <div id="graph"></div>
-        <br>
-        <hr />
-        <div id="pie"></div>
-        <br>
-        <hr>
-        <table class="u-full-width" id="api-calls">
-            <tr>
-                <th style="text-align:center">#</th>
-                <th style="text-align:center">CPR</th>
-                <th style="text-align:center">CorrelationId</th>
-                <th style="text-align:center">Total Time</th>
-                <th style="text-align:center">Time in Microservice</th>
-                <th style="text-align:center">Time in Java</th>
-            </tr>
-        </table>
+        <h3 style="text-align:center">Load Test Stats</h3>
+        <div style="margin-left:10%">
+            <button class="button-primary" id="button-request-cycles">Request Cycles</button>
+            <button class="button-primary" id="button-full-flow">Full flow</button>
+            <button class="button-primary" id="button-api-proxy">Api Proxy</button>
+            <button class="button-primary" id="button-ms">Micro service</button>
+            <button class="button-primary" id="button-java">Java</button>
+        </div>
+        <div id="flow-data">
+            <h4 id="heading"></h4>
+            <div id="graph"></div>
+            <br>
+            <hr />
+            <div id="api-table">
+                <h4 style="text-align:center">All Requests</h4>
+                <table class="u-full-width" id="api-calls">
+                    <tr>
+                        <th style="text-align:center">#</th>
+                        <th style="text-align:center">CPR <i class="fa fa-sort-desc"></i></th>
+                        <th style="text-align:center">CorrelationId <i class="fa fa-sort-desc"></i></th>
+                        <th style="text-align:center">Total Time <i class="fa fa-sort-desc"></i></th>
+                        <th style="text-align:center">Time in Microservice <i class="fa fa-sort-desc"></i></th>
+                        <th style="text-align:center">Time in Java <i class="fa fa-sort-desc"></i></th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="request-cycles" style="display:none">
+            <h4> Request cycles</h4>
+            <div id="pie"></div>
+            <br>
+            <div>
+                <table class="u-full-width" id="cycle-table">
+                    <tr>
+                        <th style="text-align:center">Cycle Number</th>
+                        <th style="text-align:center">Total requests Made <i class="fa fa-sort-desc"></i></th>
+                        <th style="text-align:center">Total time per cycle <i class="fa fa-sort-desc"></i></th>
+                </table>
+            </div>
+        </div>
     </div>
     <script src='./Highcharts-7.1.3/code/highcharts.js'></script>
     <script src='./Highcharts-7.1.3/code/modules/series-label.js'></script>
     <script src='./Highcharts-7.1.3/code/modules/exporting.js'></script>
     <script src='./Highcharts-7.1.3/code/modules/export-data.js'></script>
+    <script src="./data.js"></script>
     <script src="./sort.js"></script>
     <script src="./app.js"></script>
 
