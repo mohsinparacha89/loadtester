@@ -96,7 +96,7 @@ async function showCycleSpread() {
         xAxis: [{
             categories: categoryArray,
             title: {
-                text: 'request cycle'
+                text: 'Iterations'
             },
         }],
         yAxis: [{
