@@ -14,15 +14,12 @@ document.getElementById('button-request-cycles').addEventListener('click', showC
 
 showFullFlow();
 showTable();
-showCycletable();
+showCycleTable();
 
 async function showApiProxy() {
     flowDiv.style.display = 'block';
     cycleDiv.style.display = 'none';
     heading.textContent = 'Api Proxy - Under Construction';
-    // pie.innerHTML = '';
-    // barGraph(await getAllRequestsDataFullFlow('microservice'));
-
 }
 
 async function showJava() {
@@ -31,7 +28,6 @@ async function showJava() {
     heading.textContent = 'Java';
     pie.innerHTML = '';
     barGraph(await getAllRequestsDataFullFlow('java'));
-
 }
 async function showFullFlow() {
     flowDiv.style.display = 'block';
@@ -48,7 +44,6 @@ async function showMs() {
     heading.textContent = 'Microservice';
     pie.innerHTML = '';
     barGraph(await getAllRequestsDataFullFlow('microservice'));
-
 }
 
 async function showTable() {
@@ -64,22 +59,17 @@ async function showTable() {
             <td style="text-align:left">${e.correlationId}</td>
             <td style="text-align:center">${e.totalElapsedTime}</td>
             <td style="text-align:center">${e.timeInMicroservice}</td>
-            <td style="text-align:center">${e.timeInJava}</td>
-            `
+            <td style="text-align:center">${e.timeInJava}</td>`
             tableRows.appendChild(row);
         })
     });
-
-
 }
-
 
 async function showCycleData() {
     flowDiv.style.display = 'none';
     cycleDiv.style.display = 'block';
     showCycleSpread(await getRequestCycleDataFullFLow());
     pieChart(await getRequestCycleDataFullFLow());
-
 }
 
 async function showCycleSpread() {
@@ -88,6 +78,7 @@ async function showCycleSpread() {
     let numberOfRequests = [];
     let timePerCycle = [];
     let i = 0;
+
     apiResponse.forEach((e) => {
         categoryArray.push(++i);
         numberOfRequests.push(e.requests);
@@ -108,7 +99,7 @@ async function showCycleSpread() {
                 text: 'request cycle'
             },
         }],
-        yAxis: [{ // Secondary yAxis
+        yAxis: [{
             allowDecimals: false,
             gridLineWidth: 0,
             title: {
@@ -124,7 +115,7 @@ async function showCycleSpread() {
                 }
             }
 
-        }, { // Tertiary yAxis
+        }, {
             gridLineWidth: 0,
             title: {
                 text: 'time',
@@ -185,20 +176,18 @@ async function showCycleSpread() {
     });
 
 }
-async function showCycletable() {
+async function showCycleTable() {
     const cycleTable = document.getElementById('cycle-table');
     let i = 0;
     let apiResponse = await getJson();
 
     apiResponse.forEach(e => {
-        let averageTime;
-        averageTime = Math.round(e.totalElapsedTime / e.requests);
         const row = document.createElement('tr');
         row.innerHTML = `
         <td style="text-align:center">${++i}</td>
         <td style="text-align:center">${e.requests}</td>
         <td style="text-align:center">${e.totalElapsedTime}</td>
-        <td style="text-align:center">${averageTime}</td>
+        <td style="text-align:center">${Math.round(e.totalElapsedTime / e.requests)}</td>
         `
         cycleTable.appendChild(row);
     })
@@ -207,10 +196,8 @@ async function showCycletable() {
 async function barGraph(allrequestData) {
     let chartSegments = [];
     chartSegments.push(allrequestData.floor);
-
-
     let segmentGap = (allrequestData.ceiling - allrequestData.floor) / 5;
-    let allreqs = [];
+
     for (let i = 0; i < 5; i++) {
         let chartSegment = chartSegments[i] + segmentGap;
         chartSegments.push(chartSegment)
@@ -219,24 +206,19 @@ async function barGraph(allrequestData) {
     let requestTimes = allrequestData.requestTimes;
     let requestCount = 0;
 
-
-
     for (let i = 0; i < chartSegments.length; i++) {
         for (let j = 0; j < requestTimes.length; j++) {
             if (chartSegments[i + 1] !== undefined) {
-                if (((requestTimes[j] < chartSegments[i + 1]) && (requestTimes[j] >= chartSegments[i]))) {
+                if (((requestTimes[j] <= chartSegments[i + 1]) && (requestTimes[j] > chartSegments[i]))) {
                     requestCount += 1;
-                    allreqs.push(requestTimes[j]);
                 }
             }
             else {
-                if (requestTimes[j] >= chartSegments[i]) {
+                if (requestTimes[j] > chartSegments[i]) {
                     requestCount += 1;
-                    allreqs.push(requestTimes[j]);
                 }
             }
         }
-
         segmentData.push(requestCount);
         requestCount = 0;
     }
@@ -292,18 +274,18 @@ async function barGraph(allrequestData) {
             name: 'Population',
             data: [
                 [`${chartSegments[0]} -  ${chartSegments[1]} `, segmentData[0]],
-                [`${chartSegments[1]} -  ${chartSegments[2]} `, segmentData[1]],
-                [`${chartSegments[2]} -  ${chartSegments[3]} `, segmentData[2]],
-                [`${chartSegments[3]} -  ${chartSegments[4]} `, segmentData[3]],
-                [`${chartSegments[4]} - ${chartSegments[5]}`, segmentData[4]],
-                [`> ${chartSegments[5]} `, segmentData[5]]
+                [`${chartSegments[1] + 1} -  ${chartSegments[2]} `, segmentData[1]],
+                [`${chartSegments[2] + 1} -  ${chartSegments[3]} `, segmentData[2]],
+                [`${chartSegments[3] + 1} -  ${chartSegments[4]} `, segmentData[3]],
+                [`${chartSegments[4] + 1} - ${chartSegments[5]}`, segmentData[4]],
+                [`> ${chartSegments[5] + 1} `, segmentData[5]]
             ],
             dataLabels: {
                 enabled: true,
                 rotation: -90,
                 color: '#FFFFFF',
                 align: 'right',
-                y: 10, // 10 pixels down from the top
+                y: 10,
                 style: {
                     fontSize: '12px',
                     fontFamily: 'Verdana, sans-serif'
@@ -406,35 +388,25 @@ async function getAllRequestsDataFullFlow(type) {
             allRequestData.forEach(e => { requestTimes.push(e.totalElapsedTime) });
     }
 
-    let totalRequestTime = 0;
-
-    requestTimes.forEach(e => {
-        totalRequestTime += e;
-    })
-
+    let totalRequestTime = requestTimes.reduce((a, b) => a + b, 0);
     let averageRequestTime = totalRequestTime / requestTimes.length;
 
     let standardDeviation = Math.sqrt(requestTimes.reduce(function (sq, n) {
         return sq + Math.pow(n - averageRequestTime, 2);
     }, 0) / (requestTimes.length - 1))
 
-    let highest = Math.min(...requestTimes);
     let cutOff = averageRequestTime + standardDeviation;
-    let ceiling = highest > 100 ? Math.ceil(cutOff / 100) * 100 : Math.ceil(cutOff / 10) * 10;
+    let ceiling = Math.max(...requestTimes) > 100 ? Math.ceil(cutOff / 100) * 100 : Math.ceil(cutOff / 10) * 10;
     let lowest = Math.min(...requestTimes);
     let floor = lowest > 100 ? Math.floor(lowest / 100) * 100 : Math.floor(lowest / 10) * 10;
 
-
-    const requestData = {
+    return {
         ceiling,
         floor,
         requestTimes,
-    }
-
-    return requestData;
+    };
 
 }
-
 
 async function getAllRequestData() {
     let apiResponse = await getJson();
