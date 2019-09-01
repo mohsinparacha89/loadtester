@@ -4,6 +4,7 @@ const heading = document.getElementById('heading');
 let apiData;
 let flowDiv = document.getElementById('flow-data');
 let cycleDiv = document.getElementById('request-cycles');
+let cycleSpread = document.getElementById('cycle-spread');
 
 document.getElementById('button-full-flow').addEventListener('click', showFullFlow);
 document.getElementById('button-ms').addEventListener('click', showMs);
@@ -18,9 +19,9 @@ showCycletable();
 async function showApiProxy() {
     flowDiv.style.display = 'block';
     cycleDiv.style.display = 'none';
-    heading.textContent = 'Api Proxy';
-    pie.innerHTML = '';
-    barGraph(await getAllRequestsDataFullFlow('microservice'));
+    heading.textContent = 'Api Proxy - Under Construction';
+    // pie.innerHTML = '';
+    // barGraph(await getAllRequestsDataFullFlow('microservice'));
 
 }
 
@@ -76,20 +77,128 @@ async function showTable() {
 async function showCycleData() {
     flowDiv.style.display = 'none';
     cycleDiv.style.display = 'block';
+    showCycleSpread(await getRequestCycleDataFullFLow());
     pieChart(await getRequestCycleDataFullFLow());
+
 }
 
+async function showCycleSpread() {
+    let apiResponse = await getJson();
+    let categoryArray = [];
+    let numberOfRequests = [];
+    let timePerCycle = [];
+    let i = 0;
+    apiResponse.forEach((e) => {
+        categoryArray.push(++i);
+        numberOfRequests.push(e.requests);
+        timePerCycle.push(e.totalElapsedTime);
+    })
+    Highcharts.chart(cycleSpread, {
+        title: {
+            text: 'Concurrent Requests',
+            align: 'left'
+        },
+        subtitle: {
+            text: '',
+            align: 'left'
+        },
+        xAxis: [{
+            categories: categoryArray,
+            title: {
+                text: 'request cycle'
+            },
+        }],
+        yAxis: [{ // Secondary yAxis
+            allowDecimals: false,
+            gridLineWidth: 0,
+            title: {
+                text: 'number of parallel requests',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            labels: {
+                format: '{value} ',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            }
 
+        }, { // Tertiary yAxis
+            gridLineWidth: 0,
+            title: {
+                text: 'time',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            },
+            labels: {
+                format: '{value} ms',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            },
+            opposite: true
+        }],
+        tooltip: {
+            shared: true
+        },
+
+        series: [{
+            name: 'requests',
+            type: 'spline',
+            yAxis: 0,
+            data: numberOfRequests,
+            marker: {
+                enabled: true
+            },
+            tooltip: {
+                valueSuffix: ''
+            }
+
+        }, {
+            name: 'time per cycle',
+            type: 'spline',
+            yAxis: 1,
+            data: timePerCycle,
+            tooltip: {
+                valueSuffix: 'ms'
+            }
+        }],
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        floating: false,
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom',
+                        x: 0,
+                        y: 0
+                    }
+                }
+            }]
+        }
+    });
+
+}
 async function showCycletable() {
     const cycleTable = document.getElementById('cycle-table');
     let i = 0;
     let apiResponse = await getJson();
+
     apiResponse.forEach(e => {
+        let averageTime;
+        averageTime = Math.round(e.totalElapsedTime / e.requests);
         const row = document.createElement('tr');
         row.innerHTML = `
         <td style="text-align:center">${++i}</td>
         <td style="text-align:center">${e.requests}</td>
         <td style="text-align:center">${e.totalElapsedTime}</td>
+        <td style="text-align:center">${averageTime}</td>
         `
         cycleTable.appendChild(row);
     })
@@ -177,7 +286,7 @@ async function barGraph(allrequestData) {
             enabled: false
         },
         tooltip: {
-            pointFormat: 'Number of requests: <b>{point.y:.1f}</b>'
+            pointFormat: 'Number of requests: <b>{point.y}</b>'
         },
         series: [{
             name: 'Population',
@@ -217,7 +326,7 @@ function pieChart(requestCycleData) {
             type: 'pie'
         },
         title: {
-            text: 'Sample requests cycles'
+            text: 'Trends'
         },
         subtitle: {
             text: `Total request cycles ${requestCycleData.totalCycles} `
@@ -262,10 +371,13 @@ async function getRequestCycleDataFullFLow() {
     let highestRequestCycle = apiResponse.find((obj) => { return obj.totalElapsedTime === Math.max(...apiResponse.map(c => c.totalElapsedTime)) });
     let lowestRequestCycle = apiResponse.find((obj) => { return obj.totalElapsedTime === Math.min(...apiResponse.map(c => c.totalElapsedTime)) });
 
-    apiResponse.splice(apiResponse.indexOf(highestRequestCycle), 1);
-    apiResponse.splice(apiResponse.indexOf(lowestRequestCycle), 1);
+    const randomRequestCycle = apiResponse.reduce((accumulator, current) => {
+        if (current !== highestRequestCycle || current !== lowestRequestCycle) {
+            accumulator.push(current)
+        }
+        return accumulator
+    }, [])[Math.floor(Math.random() * (apiResponse.length - 2))]
 
-    let randomRequestCycle = apiResponse[Math.floor(Math.random() * apiResponse.length)];
 
     const requestCycle = {
         totalCycles: totalCycles,
@@ -283,8 +395,6 @@ async function getRequestCycleDataFullFLow() {
 async function getAllRequestsDataFullFlow(type) {
     const allRequestData = await getAllRequestData();
     let requestTimes = [];
-
-
     switch (type) {
         case 'microservice':
             allRequestData.forEach(e => { requestTimes.push(e.timeInMicroservice) });
@@ -308,19 +418,20 @@ async function getAllRequestsDataFullFlow(type) {
         return sq + Math.pow(n - averageRequestTime, 2);
     }, 0) / (requestTimes.length - 1))
 
-
-
     let highest = Math.min(...requestTimes);
     let cutOff = averageRequestTime + standardDeviation;
     let ceiling = highest > 100 ? Math.ceil(cutOff / 100) * 100 : Math.ceil(cutOff / 10) * 10;
     let lowest = Math.min(...requestTimes);
     let floor = lowest > 100 ? Math.floor(lowest / 100) * 100 : Math.floor(lowest / 10) * 10;
 
-    return requestData = {
+
+    const requestData = {
         ceiling,
         floor,
         requestTimes,
     }
+
+    return requestData;
 
 }
 
@@ -339,9 +450,10 @@ async function getAllRequestData() {
 
 
 async function getJson() {
-    return apiCallData;
+    const data = apiCallData
+    return data;
     // return fetch('result.json')
-    //     .then(res => res.json())
+    //      .then(res => res.json())
 
 
 }

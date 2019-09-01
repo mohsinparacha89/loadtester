@@ -35,9 +35,9 @@
                         <th style="text-align:center">#</th>
                         <th style="text-align:center">CPR <i class="fa fa-sort-desc"></i></th>
                         <th style="text-align:center">CorrelationId <i class="fa fa-sort-desc"></i></th>
-                        <th style="text-align:center">Total Time <i class="fa fa-sort-desc"></i></th>
-                        <th style="text-align:center">Time in Microservice <i class="fa fa-sort-desc"></i></th>
-                        <th style="text-align:center">Time in Java <i class="fa fa-sort-desc"></i></th>
+                        <th style="text-align:center">Total Time (ms) <i class="fa fa-sort-desc"></i></th>
+                        <th style="text-align:center">Time in Microservice (ms) <i class="fa fa-sort-desc"></i></th>
+                        <th style="text-align:center">Time in Java (ms) <i class="fa fa-sort-desc"></i></th>
                     </tr>
                 </table>
             </div>
@@ -45,13 +45,17 @@
         <div id="request-cycles" style="display:none">
             <h4> Request cycles</h4>
             <div id="pie"></div>
+            <hr>
+            <div id="cycle-spread" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
             <br>
+            <hr>
             <div>
                 <table class="u-full-width" id="cycle-table">
                     <tr>
-                        <th style="text-align:center">Cycle Number</th>
+                        <th style="text-align:center">#</th>
                         <th style="text-align:center">Total requests Made <i class="fa fa-sort-desc"></i></th>
-                        <th style="text-align:center">Total time per cycle <i class="fa fa-sort-desc"></i></th>
+                        <th style="text-align:center">Total time per cycle (ms) <i class="fa fa-sort-desc"></i></th>
+                        <th style="text-align:center">Average time per cycle (ms) <i class="fa fa-sort-desc"></i></th>
                 </table>
             </div>
         </div>
@@ -60,6 +64,7 @@
     <script src='./Highcharts-7.1.3/code/modules/series-label.js'></script>
     <script src='./Highcharts-7.1.3/code/modules/exporting.js'></script>
     <script src='./Highcharts-7.1.3/code/modules/export-data.js'></script>
+
     <script src="./data.js"></script>
     <script src="./sort.js"></script>
     <script src="./app.js"></script>
